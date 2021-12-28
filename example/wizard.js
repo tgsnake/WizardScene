@@ -1,19 +1,17 @@
-import { Scene, Stage } from '@tgsnake/wizard-session';
-import { Snake, Updates } from 'tgsnake';
-import { MessageContext } from 'tgsnake/lib/Context/MessageContext';
+const { Scene, Stage } = require('@tgsnake/wizard-session');
+const { Snake, Updates } = require('tgsnake');
+const { MessageContext } = require('tgsnake/lib/Context/MessageContext');
 const bot = new Snake();
 const scene_one = new Stage(
   'scene_one',
   (ctx, data) => {
     if (ctx instanceof MessageContext) {
-      ctx as MessageContext;
       ctx.reply('Please Input Your Number!');
       return scene_one.next(ctx, data);
     }
   },
   (ctx, data) => {
     if (ctx instanceof MessageContext) {
-      ctx as MessageContext;
       data.number = ctx.text;
       ctx.reply('Please Input Your Name!');
       return scene_one.next(ctx, data);
@@ -21,7 +19,6 @@ const scene_one = new Stage(
   },
   (ctx, data) => {
     if (ctx instanceof MessageContext) {
-      ctx as MessageContext;
       ctx.reply(`Your Name : ${ctx.text}\n Your Number : ${data.number}`);
       return scene_one.leave(ctx, data);
     }
