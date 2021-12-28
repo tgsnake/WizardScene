@@ -21,3 +21,4 @@ npm i tgsnake @tgsnake/wizard-session
 ## Example 
 you can found in `example` folders.
 
+Build with ♥️ by [tgsnake dev](https://t.me/+Fdu8unNApTg3ZGU1).

@@ -8,7 +8,12 @@
 import { Updates, Composer } from 'tgsnake';
 import { ResultGetEntity } from 'tgsnake/lib/Telegram/Users/GetEntity';
 import { MessageContext } from 'tgsnake/lib/Context/MessageContext';
+type MiddlewareFn<C> = (ctx: C, next: NextFn) => MaybePromise<any>;
+type NextFn = () => MaybePromise<void>;
 const leaf = () => Promise.resolve();
+async function run<C>(middleware: MiddlewareFn<C>, ctx: C) {
+  await middleware(ctx, leaf);
+}
 export type MaybePromise<T> = T | Promise<T>;
 export type hSceneFn = (ctx: Updates.TypeUpdate, data: any) => MaybePromise<any>;
 export interface dataScene {
@@ -43,7 +48,6 @@ export class Scene extends Composer {
     for (let i in handler) {
       this.handlers.set(Number(i), handler[i]);
     }
-    this.on('*', this._run());
   }
   private _getId(ctx: Updates.TypeUpdate) {
     if (ctx instanceof ResultGetEntity) {
@@ -190,6 +194,16 @@ export class Scene extends Composer {
       return false;
     };
   }
+  isRunning(ctx) {
+    let info = this._getId(ctx);
+    if (info) {
+      let user = this.users.get(`${info.chatId}_${info.userId}`);
+      if (user) {
+        return user.isRunning;
+      }
+    }
+    return false;
+  }
 }
 export class Stage {
   private scenes: Map<string, Scene> = new Map();
@@ -270,7 +284,8 @@ export class Stage {
           let user = scene.users.get(`${info.chatId}_${info.userId}`);
           if (user) {
             if (user.isRunning) {
-              return scene.middleware()(ctx, leaf);
+              scene.on('*', scene._run());
+              return run(scene.middleware(), ctx);
             }
           }
         }
@@ -282,7 +297,8 @@ export class Stage {
     return (ctx) => {
       let scene = this.scenes.get(sceneId);
       if (scene) {
-        return scene.middleware()(ctx, leaf);
+        scene.on('*', scene._run());
+        return run(scene.middleware(), ctx);
       }
       let a = Array.from(this.scenes);
       let b: string[] = [];
