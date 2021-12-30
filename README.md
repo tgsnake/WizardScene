@@ -1,4 +1,4 @@
-# wizard-session 
+# wizard-scenes
 official plugin for tgsnake for scenes messages.
 
 > user A : !login 
