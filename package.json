@@ -1,7 +1,7 @@
 {
-  "name": "@tgsnake/wizard-session",
+  "name": "@tgsnake/wizard-scenes",
   "version": "1.0.1",
-  "description": "WizardSession for tgsnake.",
+  "description": "WizardScenes for tgsnake.",
   "main": "./lib/index.js",
   "scripts": {
     "dev": "ts-node ./tes/index.ts",
@@ -18,8 +18,8 @@
   "files": [
     "lib/**/*"
   ],
-  "repository": "https://github.com/tgsnake/WizardSession",
-  "bugs": "https://github.com/tgsnake/WizardSession/issue",
+  "repository": "https://github.com/tgsnake/WizardScene",
+  "bugs": "https://github.com/tgsnake/WizardScene/issue",
   "author": "butthx",
   "license": "MIT",
   "private": false,
