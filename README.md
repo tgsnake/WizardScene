@@ -1,5 +1,5 @@
 # wizard-session 
-official plugin for tgsnake for sessioning messages.
+official plugin for tgsnake for scenes messages.
 
 > user A : !login 
 
@@ -9,14 +9,14 @@ official plugin for tgsnake for sessioning messages.
 
 > bot : Please input your name! 
 
-> user B : tgsnake dev
+> user A : tgsnake dev
 
 > bot : your name : tgsnake dev, your number : 123456
 
 ## Installing 
 you must have tgsnake first before installing this plugin. 
 ```bash 
-npm i tgsnake @tgsnake/wizard-session
+npm i tgsnake @tgsnake/wizard-scenes
 ```
 ## Example 
 you can found in `example` folders.
