@@ -180,9 +180,16 @@ export class Scene extends Composer {
     this._cursor(async (ctx) => {
       let info = await this._getId(ctx);
       if (info) {
-        let user = this.users.get(`${info.chatId}_${info.userId}`);
-        if (user) {
-          return Number(user.index + 1);
+        if (info.senderChatId && !this.ignoreSenderChat) {
+          let user = this.users.get(`${info.chatId}_${info.senderChatId}`);
+          if (user) {
+            return Number(user.index + 1);
+          }
+        } else {
+          let user = this.users.get(`${info.chatId}_${info.userId}`);
+          if (user) {
+            return Number(user.index + 1);
+          }
         }
       }
       return 0;
@@ -192,9 +199,16 @@ export class Scene extends Composer {
     this._cursor(async (ctx) => {
       let info = await this._getId(ctx);
       if (info) {
-        let user = this.users.get(`${info.chatId}_${info.userId}`);
-        if (user) {
-          return Number(user.index - 1);
+        if (info.senderChatId && !this.ignoreSenderChat) {
+          let user = this.users.get(`${info.chatId}_${info.senderChatId}`);
+          if (user) {
+            return Number(user.index - 1);
+          }
+        } else {
+          let user = this.users.get(`${info.chatId}_${info.userId}`);
+          if (user) {
+            return Number(user.index - 1);
+          }
         }
       }
       return 0;
@@ -228,23 +242,24 @@ export class Scene extends Composer {
               return fn(ctx, sm.data);
             }
           }
-        }
-        let user = this.users.get(`${info.chatId}_${info.userId}`);
-        if (user) {
-          let fn = this.handlers.get(user.index);
-          if (fn) {
-            return fn(ctx, user.data);
-          }
         } else {
-          let sm = {
-            isRunning: true,
-            index: 0,
-            data: {},
-          };
-          this.users.set(`${info.chatId}_${info.userId}`, sm);
-          let fn = this.handlers.get(0);
-          if (fn) {
-            return fn(ctx, sm.data);
+          let user = this.users.get(`${info.chatId}_${info.userId}`);
+          if (user) {
+            let fn = this.handlers.get(user.index);
+            if (fn) {
+              return fn(ctx, user.data);
+            }
+          } else {
+            let sm = {
+              isRunning: true,
+              index: 0,
+              data: {},
+            };
+            this.users.set(`${info.chatId}_${info.userId}`, sm);
+            let fn = this.handlers.get(0);
+            if (fn) {
+              return fn(ctx, sm.data);
+            }
           }
         }
       }
@@ -254,9 +269,16 @@ export class Scene extends Composer {
   isRunning(ctx) {
     let info = this._getId(ctx);
     if (info) {
-      let user = this.users.get(`${info.chatId}_${info.userId}`);
-      if (user) {
-        return user.isRunning;
+      if (info.senderChatId && !this.ignoreSenderChat) {
+        let user = this.users.get(`${info.chatId}_${info.senderChatId}`);
+        if (user) {
+          return user.isRunning;
+        }
+      } else {
+        let user = this.users.get(`${info.chatId}_${info.userId}`);
+        if (user) {
+          return user.isRunning;
+        }
       }
     }
     return false;
@@ -363,12 +385,13 @@ export class Stage {
                 return run(scene.middleware(), ctx);
               }
             }
-          }
-          let user = scene.users.get(`${info.chatId}_${info.userId}`);
-          if (user) {
-            if (user.isRunning) {
-              scene.on('*', scene._run());
-              return run(scene.middleware(), ctx);
+          } else {
+            let user = scene.users.get(`${info.chatId}_${info.userId}`);
+            if (user) {
+              if (user.isRunning) {
+                scene.on('*', scene._run());
+                return run(scene.middleware(), ctx);
+              }
             }
           }
         }

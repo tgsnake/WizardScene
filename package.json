@@ -1,6 +1,6 @@
 {
   "name": "@tgsnake/wizard-scenes",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "WizardScenes for tgsnake.",
   "main": "./lib/index.js",
   "scripts": {
