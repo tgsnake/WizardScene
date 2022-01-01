@@ -60,9 +60,9 @@ acorn-walk@^8.1.1:
   integrity sha512-k+iyHEuPgSw6SbuDpGQM+06HQUa04DZ3o+F6CSzXMvvI5KMvnaEqXe+YVe555R9nn6GPt404fos4wcgpw12SDA==
 
 acorn@^8.4.1:
-  version "8.6.0"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.6.0.tgz#e3692ba0eb1a0c83eaa4f37f5fa7368dd7142895"
-  integrity sha512-U1riIR+lBSNi3IbxtaHOIKdH8sLFv3NYfNv8sg7ZsNhcfl4HF2++BfqqrNAxoCLQW1iiylOj76ecnaUxz+z9yw==
+  version "8.7.0"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.7.0.tgz#90951fde0f8f09df93549481e5fc141445b791cf"
+  integrity sha512-V/LGr1APy+PXIwKebEWrkZPwoeoF+w1jiOBUmuxuiUIaOHtob8Qc9BTrYo7VuI5fR8tqsy+buA2WFooR5olqvQ==
 
 ansi-styles@^4.1.0:
   version "4.3.0"
@@ -980,9 +980,9 @@ tg-file-id@1.1.2:
   integrity sha512-CP82EimaqVzI5ww7apIAOPkaKCx4kfAK11MPOw4YT7HXr9rbbPKWOIyIQV6dDUH2jBVM3lHDShXFS98u5+ABdQ==
 
 tgsnake@^2.0.0-beta.4:
-  version "2.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/tgsnake/-/tgsnake-2.0.0-beta.4.tgz#88b90cb7086882ea024d68af8e0a1c6850e00578"
-  integrity sha512-E3Fw1LdhEl1MpWr8Hxsq8/g/XnHL9GY3GGgnp3ZwhWKgHngeTTGnqp/A/EkbT3gb3JQXuUMjj0fFHXP8ApiGig==
+  version "2.0.0-beta.7"
+  resolved "https://registry.yarnpkg.com/tgsnake/-/tgsnake-2.0.0-beta.7.tgz#945601532241a925f271d9b6c7648fc8e8353c42"
+  integrity sha512-wc8M6UkleHkYgIT3IXfZT+iaU2yphm/DayLnzUenf9f0P+1wa1HYatQgLktIFQun+avUwO6kweSiPs9Cx090gw==
   dependencies:
     axios "0.24.0"
     big-integer "1.6.51"

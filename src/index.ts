@@ -24,6 +24,7 @@ export interface dataScene {
 export interface userObject {
   userId: bigint;
   chatId: bigint;
+  senderChatId?: bigint;
 }
 export type FilterFn = (ctx: Updates.TypeUpdate, data: any) => MaybePromise<number>;
 export class WizardError extends Error {
@@ -42,6 +43,7 @@ export class Scene extends Composer {
   id!: string;
   private handlers: Map<number, hSceneFn> = new Map();
   users: Map<string, dataScene> = new Map();
+  ignoreSenderChat: boolean = false;
   constructor(id: string, ...handler: Array<hSceneFn>) {
     super();
     this.id = id;
@@ -61,6 +63,7 @@ export class Scene extends Composer {
       ctx as MessageContext;
       return {
         userId: ctx.from.id,
+        senderChatId: ctx.senderChat && !ctx.isAutomaticForward ? ctx.senderChat?.id : undefined,
         chatId: ctx.chat.id,
       } as userObject;
     }
@@ -68,8 +71,10 @@ export class Scene extends Composer {
       ctx as Updates.UpdateNewMessage;
       let message = ctx.message as MessageContext;
       return {
-        userId: message.chat.id,
+        userId: message.from.id,
         chatId: message.chat.id,
+        senderChatId:
+          message.senderChat && !message.isAutomaticForward ? message.senderChat?.id : undefined,
       } as userObject;
     }
     if (ctx instanceof Updates.UpdateShortMessage) {
@@ -78,6 +83,8 @@ export class Scene extends Composer {
       return {
         userId: message.from.id,
         chatId: message.chat.id,
+        senderChatId:
+          message.senderChat && !message.isAutomaticForward ? message.senderChat?.id : undefined,
       } as userObject;
     }
     if (ctx instanceof Updates.UpdateShortChatMessage) {
@@ -86,6 +93,8 @@ export class Scene extends Composer {
       return {
         userId: message.from.id,
         chatId: message.chat.id,
+        senderChatId:
+          message.senderChat && !message.isAutomaticForward ? message.senderChat?.id : undefined,
       } as userObject;
     }
     if (ctx instanceof Updates.UpdateNewChannelMessage) {
@@ -94,6 +103,8 @@ export class Scene extends Composer {
       return {
         userId: message.from.id,
         chatId: message.chat.id,
+        senderChatId:
+          message.senderChat && !message.isAutomaticForward ? message.senderChat?.id : undefined,
       } as userObject;
     }
     if (ctx instanceof Updates.UpdateBotCallbackQuery) {
@@ -102,6 +113,13 @@ export class Scene extends Composer {
       return {
         userId: ctx.from.id,
         chatId: chatId,
+        senderChatId:
+          ctx.message &&
+          ctx.message.replyToMessage &&
+          ctx.message.replyToMessage.senderChat &&
+          !ctx.message.replyToMessage.isAutomaticForward
+            ? ctx.message.replyToMessage.senderChat.id
+            : undefined,
       } as userObject;
     }
     if (ctx instanceof Updates.UpdateBotInlineQuery) {
@@ -116,20 +134,39 @@ export class Scene extends Composer {
     return async (ctx) => {
       let info = await this._getId(ctx);
       if (info) {
-        let user = await this.users.get(`${info.chatId}_${info.userId}`);
-        if (user) {
-          let index = await filter(ctx, user.data);
-          let fn = this.handlers.get(index as number);
-          if (fn) {
-            user.isRunning = true;
-            user.index = index;
-            if (data) user.data = data;
-            this.users.set(`${info.chatId}_${info.userId}`, user);
-          } else {
-            user.isRunning = false;
-            user.index = 0;
-            if (data) user.data = data;
-            this.users.set(`${info.chatId}_${info.userId}`, user);
+        if (info.senderChatId && !this.ignoreSenderChat) {
+          let user = await this.users.get(`${info.chatId}_${info.senderChatId}`);
+          if (user) {
+            let index = await filter(ctx, user.data);
+            let fn = this.handlers.get(index as number);
+            if (fn) {
+              user.isRunning = true;
+              user.index = index;
+              if (data) user.data = data;
+              this.users.set(`${info.chatId}_${info.userId}`, user);
+            } else {
+              user.isRunning = false;
+              user.index = 0;
+              if (data) user.data = data;
+              this.users.set(`${info.chatId}_${info.userId}`, user);
+            }
+          }
+        } else {
+          let user = await this.users.get(`${info.chatId}_${info.userId}`);
+          if (user) {
+            let index = await filter(ctx, user.data);
+            let fn = this.handlers.get(index as number);
+            if (fn) {
+              user.isRunning = true;
+              user.index = index;
+              if (data) user.data = data;
+              this.users.set(`${info.chatId}_${info.userId}`, user);
+            } else {
+              user.isRunning = false;
+              user.index = 0;
+              if (data) user.data = data;
+              this.users.set(`${info.chatId}_${info.userId}`, user);
+            }
           }
         }
       }
@@ -172,6 +209,26 @@ export class Scene extends Composer {
     return async (ctx) => {
       let info = await this._getId(ctx);
       if (info) {
+        if (info.senderChatId && !this.ignoreSenderChat) {
+          let user = this.users.get(`${info.chatId}_${info.senderChatId}`);
+          if (user) {
+            let fn = this.handlers.get(user.index);
+            if (fn) {
+              return fn(ctx, user.data);
+            }
+          } else {
+            let sm = {
+              isRunning: true,
+              index: 0,
+              data: {},
+            };
+            this.users.set(`${info.chatId}_${info.senderChatId}`, sm);
+            let fn = this.handlers.get(0);
+            if (fn) {
+              return fn(ctx, sm.data);
+            }
+          }
+        }
         let user = this.users.get(`${info.chatId}_${info.userId}`);
         if (user) {
           let fn = this.handlers.get(user.index);
@@ -207,6 +264,7 @@ export class Scene extends Composer {
 }
 export class Stage {
   private scenes: Map<string, Scene> = new Map();
+  ignoreSenderChat: boolean = false;
   constructor(...scenes: Array<Scene>) {
     for (let scene of scenes) {
       this.scenes.set(scene.id, scene);
@@ -224,6 +282,7 @@ export class Stage {
       ctx as MessageContext;
       return {
         userId: ctx.from.id,
+        senderChatId: ctx.senderChat && !ctx.isAutomaticForward ? ctx.senderChat?.id : undefined,
         chatId: ctx.chat.id,
       } as userObject;
     }
@@ -231,8 +290,10 @@ export class Stage {
       ctx as Updates.UpdateNewMessage;
       let message = ctx.message as MessageContext;
       return {
-        userId: message.chat.id,
+        userId: message.from.id,
         chatId: message.chat.id,
+        senderChatId:
+          message.senderChat && !message.isAutomaticForward ? message.senderChat?.id : undefined,
       } as userObject;
     }
     if (ctx instanceof Updates.UpdateShortMessage) {
@@ -241,6 +302,8 @@ export class Stage {
       return {
         userId: message.from.id,
         chatId: message.chat.id,
+        senderChatId:
+          message.senderChat && !message.isAutomaticForward ? message.senderChat?.id : undefined,
       } as userObject;
     }
     if (ctx instanceof Updates.UpdateShortChatMessage) {
@@ -249,6 +312,8 @@ export class Stage {
       return {
         userId: message.from.id,
         chatId: message.chat.id,
+        senderChatId:
+          message.senderChat && !message.isAutomaticForward ? message.senderChat?.id : undefined,
       } as userObject;
     }
     if (ctx instanceof Updates.UpdateNewChannelMessage) {
@@ -257,6 +322,8 @@ export class Stage {
       return {
         userId: message.from.id,
         chatId: message.chat.id,
+        senderChatId:
+          message.senderChat && !message.isAutomaticForward ? message.senderChat?.id : undefined,
       } as userObject;
     }
     if (ctx instanceof Updates.UpdateBotCallbackQuery) {
@@ -265,6 +332,13 @@ export class Stage {
       return {
         userId: ctx.from.id,
         chatId: chatId,
+        senderChatId:
+          ctx.message &&
+          ctx.message.replyToMessage &&
+          ctx.message.replyToMessage.senderChat &&
+          !ctx.message.replyToMessage.isAutomaticForward
+            ? ctx.message.replyToMessage.senderChat.id
+            : undefined,
       } as userObject;
     }
     if (ctx instanceof Updates.UpdateBotInlineQuery) {
@@ -281,6 +355,15 @@ export class Stage {
       for (let [id, scene] of a) {
         let info = this._getId(ctx);
         if (info) {
+          if (info.senderChatId && !this.ignoreSenderChat) {
+            let user = scene.users.get(`${info.chatId}_${info.senderChatId}`);
+            if (user) {
+              if (user.isRunning) {
+                scene.on('*', scene._run());
+                return run(scene.middleware(), ctx);
+              }
+            }
+          }
           let user = scene.users.get(`${info.chatId}_${info.userId}`);
           if (user) {
             if (user.isRunning) {
