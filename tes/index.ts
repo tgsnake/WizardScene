@@ -40,13 +40,13 @@ scene_one.use((ctx,next)=>{
   console.log(ctx,scene_one)
   next()
 })
-/*scene_one.action("cancel",(ctx)=>{
+scene_one.action("cancel",(ctx)=>{
   if(!scene_one.isRunning(ctx)){
     return ctx.message.reply("no scenes running!")
   }
   ctx.message.reply("leaving from current scenes")
   return scene_one.leave(ctx,{})
-})*/
+})
 const stage = new Stage(scene_one)
 bot.use(stage.middleware()); 
 bot.cmd("start",(ctx)=>{

@@ -1,4 +1,4 @@
-import { Scene, Stage } from '@tgsnake/wizard-session';
+import { Scene, Stage } from '@tgsnake/wizard-scenes';
 import { Snake, Updates } from 'tgsnake';
 import { MessageContext } from 'tgsnake/lib/Context/MessageContext';
 const bot = new Snake();

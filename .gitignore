@@ -49,6 +49,12 @@ typings/
 
 # Optional npm cache directory
 .npm
+.yarn/*
+!.yarn/cache
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
 
 # Optional eslint cache
 .eslintcache
@@ -104,8 +110,10 @@ dist
 .tern-port
 
 # build
-/lib
+/build
 # tgsnake session 
 /tgsnake
 # tgsnake config 
-tgsnake.config.js
+#tgsnake.config.js
+/twigs 
+/people

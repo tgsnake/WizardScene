@@ -1,4 +1,4 @@
-const { Scene, Stage } = require('@tgsnake/wizard-session');
+const { Scene, Stage } = require('@tgsnake/wizard-scenes');
 const { Snake, Updates } = require('tgsnake');
 const { MessageContext } = require('tgsnake/lib/Context/MessageContext');
 const bot = new Snake();
