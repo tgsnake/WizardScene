@@ -110,10 +110,6 @@ dist
 .tern-port
 
 # build
-/build
-# tgsnake session 
-/tgsnake
-# tgsnake config 
-#tgsnake.config.js
-/twigs 
-/people
+/lib
+# tgsnake session
+tgsnake**
